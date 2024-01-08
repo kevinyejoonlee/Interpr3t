@@ -5,7 +5,7 @@ import cheerio from 'https://cdn.skypack.dev/cheerio';
 
 var form = document.getElementById('searchBar');
 var searchInput = document.getElementById('search');
-var searchOnGoogle = ["niv", "esv", "easy bible"];
+var searchOnGoogle = ["niv","easy bible", "esv"];
 
 
 
