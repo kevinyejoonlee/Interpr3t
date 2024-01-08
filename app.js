@@ -1,48 +1,73 @@
 
-import axios from 'https://cdn.skypack.dev/axios';
-import cheerio from 'https://cdn.skypack.dev/cheerio';
+// grab the first link from search
+// 	- link with python
+// 		- can the python open the first link?
+//  - web scrape with js
+//      - do i need to set up express 
+
+import axios from 'axios';
+import cheerio from 'cheerio';
+import express from "express";
+import bodyParser from "body-parser";
+// import puppeteer from "puppeteer";
 
 
-var form = document.getElementById('searchBar');
-var searchInput = document.getElementById('search');
-var searchOnGoogle = ["niv", "esv", "easy bible"];
+const app = express();
+const port = 3000;
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
-async function scrapeFirstResult(query) {
+const googleArray = ["niv", "esv", "easy+bible"];
+
+async function getFirstGoogleSearchLink(query) {
     try {
-        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+  
+        const response = await axios.get(query , {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+            }
+        });
 
-        const response = await axios.get(searchUrl);
-        const $ = cheerio.load(response.data);
 
-        // Google's search result selectors (note: these are likely to change)
-        const resultsSelector = 'div#search .tF2Cxc';
-        const firstResult = $(resultsSelector).first().find('a').attr('href');
-
-        console.log('First search result URL:', firstResult);
     } catch (error) {
-        console.error('Error occurred:', error);
+        console.error('Error fetching the first link:', error);
+        return null;
     }
 }
 
 
-form.addEventListener('submit', function (event) {
-    event.preventDefault(); 
-    document.close()
 
-    for (let index = 0; index < searchOnGoogle.length; index++) {
-        searchOnGoogle[index] = "https://www.google.com/search?q=" + searchOnGoogle[index] + " " + searchInput.value ;
-        
+app.get("/", (req, res) => {
+    res.render("index.ejs");
+  });
+
+
+app.post("/submit", (req, res) => {
+    var searchInput = req.body.query;
+
+    for (let index = 0; index < googleArray.length; index++) {
+        googleArray[index] = "https://www.google.com/search?q=" + googleArray[index] + "+" + searchInput ;
     }
 
-    searchOnGoogle.forEach(element => {
-        var newWindow = window.open(element, '_blank');
+    // googleArray.forEach(element => {
+    //     exec('open ' + element);
+    // });
 
-     
-        });
+    console.log(getFirstGoogleSearchLink(googleArray[0]));
 
-
-
+    
+    res.render("index.ejs");
 });
+  
 
+
+
+
+
+
+
+app.listen(port, () => {
+    console.log(`http://localhost:3000/`);
+  });
 
